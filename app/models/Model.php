@@ -13,11 +13,6 @@ class Model
         $this->insert_admin_data();
     }
 
-    private function generate_uuid()
-    {
-        return bin2hex(random_bytes(16));
-    }
-
     private function create_users_table()
     {
         $sql = "CREATE TABLE IF NOT EXISTS users (
@@ -43,7 +38,7 @@ class Model
 
         if (!$is_admin_exists) {
             $data = [
-                "uuid" => $this->generate_uuid(),
+                "uuid" => $this->database->generate_uuid(),
                 "name" => 'Administrator',
                 "username" => 'admin',
                 "password" => password_hash('admin123', PASSWORD_BCRYPT),

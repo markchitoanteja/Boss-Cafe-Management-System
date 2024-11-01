@@ -12,6 +12,27 @@ class Database
         $this->connect();
     }
 
+    private function create_database()
+    {
+        $sql = "CREATE DATABASE IF NOT EXISTS " . $this->database_name;
+
+        if (!$this->connection->query($sql) === TRUE) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Generate a unique UUID.
+     *
+     * @return string A 32-character hexadecimal UUID.
+     */
+    public function generate_uuid()
+    {
+        return bin2hex(random_bytes(16));
+    }
+
     /**
      * Establishes a database connection and creates the database if it doesn't exist.
      *
@@ -34,15 +55,59 @@ class Database
         return $this->connection;
     }
 
-    private function create_database()
+    /**
+     * Backs up the entire database to an SQL file.
+     *
+     * @param string|null $backupDir Directory to save the backup file. Defaults to the current directory.
+     * @return string|bool The path to the backup file if successful, or false on failure.
+     */
+    public function backup($backupDir = null)
     {
-        $sql = "CREATE DATABASE IF NOT EXISTS " . $this->database_name;
+        $backupDir = $backupDir ?? __DIR__;
+        $backupFile = $backupDir . '/backup_' . $this->database_name . '_' . date("Y-m-d_H-i-s") . '.sql';
 
-        if (!$this->connection->query($sql) === TRUE) {
+        try {
+            $tables = [];
+            $result = $this->connection->query("SHOW TABLES");
+
+            if (!$result) {
+                throw new Exception("Error retrieving tables: " . $this->connection->error);
+            }
+
+            while ($row = $result->fetch_row()) {
+                $tables[] = $row[0];
+            }
+
+            $sqlDump = "-- Database Backup\n-- Database: {$this->database_name}\n-- Date: " . date("Y-m-d H:i:s") . "\n\n";
+
+            foreach ($tables as $table) {
+                $tableCreate = $this->connection->query("SHOW CREATE TABLE `$table`")->fetch_row()[1] . ";\n\n";
+                $sqlDump .= "-- Structure for table `$table`\n";
+                $sqlDump .= $tableCreate . "\n\n";
+
+                $result = $this->connection->query("SELECT * FROM `$table`");
+
+                if ($result->num_rows > 0) {
+                    $sqlDump .= "-- Data for table `$table`\n";
+                    while ($row = $result->fetch_assoc()) {
+                        $values = array_map([$this->connection, 'real_escape_string'], array_values($row));
+                        $values = "'" . implode("', '", $values) . "'";
+                        $columns = implode("`, `", array_keys($row));
+                        $sqlDump .= "INSERT INTO `$table` (`$columns`) VALUES ($values);\n";
+                    }
+                    $sqlDump .= "\n";
+                }
+            }
+
+            if (file_put_contents($backupFile, $sqlDump) === false) {
+                throw new Exception("Error writing backup file");
+            }
+
+            return $backupFile;
+        } catch (Exception $e) {
+            error_log("Backup Error: " . $e->getMessage());
             return false;
         }
-
-        return true;
     }
 
     /**
@@ -124,6 +189,56 @@ class Database
             }
         } catch (mysqli_sql_exception $e) {
             return false;
+        }
+    }
+
+    /**
+     * Updates a record in a specified database table with given data and conditions.
+     *
+     * @param string $table The name of the table to update.
+     * @param array $data Associative array of column-value pairs to update.
+     * @param array $conditions Associative array of conditions where keys are column names and values are the values to match.
+     * @param string $operator Logical operator to use between conditions ("AND" or "OR"). Default is "AND".
+     * @return bool Returns true if the query executed successfully, false otherwise.
+     */
+    public function update($table, array $data, array $conditions, $operator = "AND")
+    {
+        try {
+            $setClauses = [];
+            $params = [];
+            $types = "";
+
+            foreach ($data as $column => $value) {
+                $setClauses[] = "$column = ?";
+                $params[] = $value;
+                $types .= "s";
+            }
+
+            $conditionClauses = [];
+            foreach ($conditions as $column => $value) {
+                $conditionClauses[] = "$column = ?";
+                $params[] = $value;
+                $types .= "s";
+            }
+
+            $setString = implode(", ", $setClauses);
+            $conditionString = implode(" $operator ", $conditionClauses);
+            $sql = "UPDATE $table SET $setString WHERE $conditionString";
+
+            $stmt = $this->connection->prepare($sql);
+
+            if ($stmt === false) {
+                throw new Exception("SQL Preparation Error: " . $this->connection->error);
+            }
+
+            if ($stmt->bind_param($types, ...$params) && $stmt->execute()) {
+                return true;
+            } else {
+                throw new Exception("Execution Error: " . $stmt->error);
+            }
+        } catch (Exception $e) {
+            error_log("Update Error: " . $e->getMessage());
+            return false;  // Return false if an exception occurs
         }
     }
 }

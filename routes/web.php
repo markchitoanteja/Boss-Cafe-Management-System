@@ -3,6 +3,7 @@ $routes = [
     // Normal Pages
     '' => '../app/views/auth/login.php',
     'login' => '../app/views/auth/login.php',
+    'dashboard' => '../app/views/pages/dashboard.php',
 
     // Server
     'server' => '../app/controllers/Controller.php',
