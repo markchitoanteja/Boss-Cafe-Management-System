@@ -1,0 +1,5 @@
+.fa-peso::before {
+    content: "₱";
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+}

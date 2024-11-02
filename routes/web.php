@@ -4,6 +4,7 @@ $routes = [
     '' => '../app/views/auth/login.php',
     'login' => '../app/views/auth/login.php',
     'dashboard' => '../app/views/pages/dashboard.php',
+    'menu_management' => '../app/views/pages/menu_management.php',
 
     // Server
     'server' => '../app/controllers/Controller.php',

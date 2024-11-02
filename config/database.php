@@ -164,6 +164,69 @@ class Database
     }
 
     /**
+     * Selects multiple records from a database table with multiple conditions and optional ordering.
+     *
+     * @param string $table The name of the table to query.
+     * @param array $conditions Associative array of conditions where keys are column names and values are the column values to match.
+     * @param string $operator Logical operator to use between conditions ("AND" or "OR"). Default is "AND".
+     * @param string $orderBy Column to order by. Default is an empty string (no ordering).
+     * @param string $orderDir Order direction, either "ASC" or "DESC". Default is "ASC".
+     * @return array|null The result as an array of associative arrays, or null if no matches are found.
+     */
+    public function select_many($table, $conditions = [], $operator = "AND", $orderBy = "", $orderDir = "ASC")
+    {
+        $sql = "SELECT * FROM $table";
+        $params = [];
+        $types = "";
+
+        if (!empty($conditions)) {
+            $conditionStrings = [];
+            foreach ($conditions as $column => $value) {
+                $conditionStrings[] = "$column = ?";
+                $params[] = $value;
+                $types .= "s";
+            }
+            $sql .= " WHERE " . implode(" $operator ", $conditionStrings);
+        }
+
+        if (!empty($orderBy)) {
+            $orderDir = strtoupper($orderDir) === "DESC" ? "DESC" : "ASC";
+            $sql .= " ORDER BY $orderBy $orderDir";
+        }
+
+        $stmt = $this->connection->prepare($sql);
+        if (!empty($params)) {
+            $stmt->bind_param($types, ...$params);
+        }
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    /**
+     * Selects all records from a database table with optional ordering.
+     *
+     * @param string $table The name of the table to query.
+     * @param string $orderBy Column to order by. Default is an empty string (no ordering).
+     * @param string $orderDir Order direction, either "ASC" or "DESC". Default is "ASC".
+     * @return array|null The result as an array of associative arrays, or null if no records are found.
+     */
+    public function select_all($table, $orderBy = "", $orderDir = "ASC")
+    {
+        $sql = "SELECT * FROM $table";
+
+        if (!empty($orderBy)) {
+            $orderDir = strtoupper($orderDir) === "DESC" ? "DESC" : "ASC";
+            $sql .= " ORDER BY $orderBy $orderDir";
+        }
+
+        $result = $this->connection->query($sql);
+
+        return $result ? $result->fetch_all(MYSQLI_ASSOC) : null;
+    }
+
+    /**
      * Inserts a new record into a specified database table.
      *
      * @param string $table The name of the table where the data will be inserted.
@@ -238,7 +301,44 @@ class Database
             }
         } catch (Exception $e) {
             error_log("Update Error: " . $e->getMessage());
-            return false;  // Return false if an exception occurs
+            return false;
+        }
+    }
+
+    /**
+     * Deletes records from a specified database table based on given conditions.
+     *
+     * @param string $table The name of the table from which to delete records.
+     * @param array $conditions Associative array of conditions where keys are column names and values are the column values to match.
+     * @param string $operator Logical operator to use between conditions ("AND" or "OR"). Default is "AND".
+     * @return bool Returns true if the record(s) were successfully deleted, false otherwise.
+     */
+    public function delete($table, array $conditions, $operator = "AND")
+    {
+        $sql = "DELETE FROM $table WHERE ";
+        $conditionStrings = [];
+        $params = [];
+        $types = "";
+
+        foreach ($conditions as $column => $value) {
+            $conditionStrings[] = "$column = ?";
+            $params[] = $value;
+            $types .= "s";
+        }
+
+        $sql .= implode(" $operator ", $conditionStrings);
+
+        $stmt = $this->connection->prepare($sql);
+        
+        if ($stmt === false) {
+            throw new Exception("SQL Preparation Error: " . $this->connection->error);
+        }
+
+        if ($stmt->bind_param($types, ...$params) && $stmt->execute()) {
+            return $stmt->affected_rows > 0;
+        } else {
+            error_log("Delete Error: " . $stmt->error);
+            return false;
         }
     }
 }

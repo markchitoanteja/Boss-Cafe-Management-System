@@ -29,8 +29,9 @@ if (!session("user_id")) {
     <link href="./assets/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet">
     <link href="./assets/plugins/nprogress/nprogress.css" rel="stylesheet">
     <link href="./assets/plugins/sweetalert2/css/sweetalert2.min.css" rel="stylesheet">
-
+    <link href="./assets/plugins/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet">
     <link href="./assets/css/custom.min.css" rel="stylesheet">
+    <link href="./assets/css/main.css" rel="stylesheet">
 </head>
 
 <body class="nav-md">
@@ -63,33 +64,33 @@ if (!session("user_id")) {
                         <div class="menu_section">
                             <h3>Overview</h3>
                             <ul class="nav side-menu">
-                                <li class="current-page"><a href="dashboard"><i class="fa fa-dashboard"></i> Dashboard </a></li>
+                                <li><a href="dashboard"><i class="fa fa-dashboard"></i> Dashboard </a></li>
                             </ul>
                         </div>
                         <div class="menu_section">
                             <h3>Sales & Orders</h3>
                             <ul class="nav side-menu">
-                                <li class=""><a href="orders"><i class="fa fa-list-alt"></i> Orders </a></li>
-                                <li class=""><a href="sales_report"><i class="fa fa-line-chart"></i> Sales Report </a></li>
+                                <li><a href="orders"><i class="fa fa-list-alt"></i> Orders </a></li>
+                                <li><a href="sales_report"><i class="fa fa-line-chart"></i> Sales Report </a></li>
                             </ul>
                         </div>
                         <div class="menu_section">
                             <h3>Menu & Inventory</h3>
                             <ul class="nav side-menu">
-                                <li class=""><a href="menu_management"><i class="fa fa-cutlery"></i> Menu Management </a></li>
-                                <li class=""><a href="inventory"><i class="fa fa-archive"></i> Inventory </a></li>
+                                <li><a href="menu_management"><i class="fa fa-cutlery"></i> Menu Management </a></li>
+                                <li><a href="inventory"><i class="fa fa-archive"></i> Inventory </a></li>
                             </ul>
                         </div>
                         <div class="menu_section">
                             <h3>Customer Management</h3>
                             <ul class="nav side-menu">
-                                <li class=""><a href="customers"><i class="fa fa-users"></i> Customers </a></li>
+                                <li><a href="customers"><i class="fa fa-users"></i> Customers </a></li>
                             </ul>
                         </div>
                         <div class="menu_section">
                             <h3>Reports & Analytics</h3>
                             <ul class="nav side-menu">
-                                <li class=""><a href="reports"><i class="fa fa-file-text-o"></i> Reports </a></li>
+                                <li><a href="reports"><i class="fa fa-file-text-o"></i> Reports </a></li>
                             </ul>
                         </div>
                     </div>

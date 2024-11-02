@@ -16,7 +16,7 @@
                         </div>
                     </div>
                     <div class="main-form">
-                        <div id="notification_alert" class="alert alert-danger d-none" role="alert">
+                        <div class="alert alert-danger text-center d-none notification_alert" role="alert">
                             Username is already taken. Please choose a different username.
                         </div>
 

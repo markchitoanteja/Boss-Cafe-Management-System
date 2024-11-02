@@ -33,26 +33,39 @@ jQuery(document).ready(function () {
     $(".about_us").click(function () {
         $("#about_us_modal").modal("show");
     })
-    
+
     $(".backup").click(function () {
-        var formData = new FormData();
-        
-        formData.append('action', 'backup_database');
-        
-        $.ajax({
-            url: 'server',
-            data: formData,
-            type: 'POST',
-            dataType: 'JSON',
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                if (response.success){
-                    location.reload();
-                }
-            },
-            error: function(_, _, error) {
-                console.error(error);
+        Swal.fire({
+            title: "Confirm Backup",
+            text: "A backup of the current database will be created as an SQL file. Do you want to proceed?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, create backup",
+            cancelButtonText: "Cancel"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var formData = new FormData();
+
+                formData.append('action', 'backup_database');
+
+                $.ajax({
+                    url: 'server',
+                    data: formData,
+                    type: 'POST',
+                    dataType: 'JSON',
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response.success) {
+                            location.reload();
+                        }
+                    },
+                    error: function (_, _, error) {
+                        console.error(error);
+                    }
+                });
             }
         });
     })
@@ -106,7 +119,7 @@ jQuery(document).ready(function () {
         $(".main-form").addClass("d-none");
         $(".loading").removeClass("d-none");
 
-        $("#notification_alert").addClass("d-none");
+        $(".notification_alert").addClass("d-none");
 
         $("#account_settings_submit").attr("disabled", true);
 
@@ -133,7 +146,7 @@ jQuery(document).ready(function () {
                 } else {
                     $("#account_settings_submit").removeAttr("disabled");
                     $("#account_settings_username").addClass("is-invalid");
-                    $("#notification_alert").removeClass("d-none");
+                    $(".notification_alert").removeClass("d-none");
 
                     $(".main-form").removeClass("d-none");
                     $(".loading").addClass("d-none");
@@ -147,5 +160,191 @@ jQuery(document).ready(function () {
 
     $("#account_settings_username").keydown(function () {
         $("#account_settings_username").removeClass("is-invalid");
+    })
+
+    $("#new_item_form").submit(function () {
+        const name = $("#new_item_name").val();
+        const category = $("#new_item_category").val();
+        const price = $("#new_item_price").val();
+        const status = $("#new_item_status").val();
+
+        $(".main-form").addClass("d-none");
+        $(".loading").removeClass("d-none");
+
+        $(".notification_alert").addClass("d-none");
+
+        $("#new_item_submit").attr("disabled", true);
+
+        var formData = new FormData();
+
+        formData.append('name', name);
+        formData.append('category', category);
+        formData.append('price', price);
+        formData.append('status', status);
+
+        formData.append('action', 'new_item');
+
+        $.ajax({
+            url: 'server',
+            data: formData,
+            type: 'POST',
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    $(".notification_alert").removeClass("d-none");
+                    $("#new_item_name").addClass("is-invalid");
+
+                    $(".main-form").removeClass("d-none");
+                    $(".loading").addClass("d-none");
+
+                    $("#new_item_submit").removeAttr("disabled");
+                }
+            },
+            error: function (_, _, error) {
+                console.error(error);
+            }
+        });
+    })
+
+    $("#new_item_name").keydown(function () {
+        $("#new_item_name").removeClass("is-invalid");
+    })
+
+    $(document).on("click", ".update_item", function () {
+        const id = $(this).attr("item_id");
+
+        $("#update_item_modal").modal("show");
+
+        $(".main-form").addClass("d-none");
+        $(".loading").removeClass("d-none");
+
+        $(".notification_alert").addClass("d-none");
+
+        var formData = new FormData();
+
+        formData.append('id', id);
+
+        formData.append('action', 'get_item_data');
+
+        $.ajax({
+            url: 'server',
+            data: formData,
+            type: 'POST',
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    $("#update_item_id").val(response.message.id);
+                    $("#update_item_name").val(response.message.name);
+                    $("#update_item_category").val(response.message.category);
+                    $("#update_item_price").val(response.message.price);
+                    $("#update_item_status").val(response.message.status);
+
+                    $(".main-form").removeClass("d-none");
+                    $(".loading").addClass("d-none");
+                }
+            },
+            error: function (_, _, error) {
+                console.error(error);
+            }
+        });
+    })
+
+    $(document).on("click", ".delete_item", function () {
+        const id = $(this).attr("item_id");
+
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var formData = new FormData();
+
+                formData.append('id', id);
+
+                formData.append('action', 'delete_item');
+
+                $.ajax({
+                    url: 'server',
+                    data: formData,
+                    type: 'POST',
+                    dataType: 'JSON',
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response.success) {
+                            location.reload();
+                        }
+                    },
+                    error: function (_, _, error) {
+                        console.error(error);
+                    }
+                });
+            }
+        });
+    })
+
+    $("#update_item_form").submit(function () {
+        const id = $("#update_item_id").val();
+        const name = $("#update_item_name").val();
+        const category = $("#update_item_category").val();
+        const price = $("#update_item_price").val();
+        const status = $("#update_item_status").val();
+
+        $(".main-form").addClass("d-none");
+        $(".loading").removeClass("d-none");
+
+        $(".notification_alert").addClass("d-none");
+
+        $("#update_item_submit").attr("disabled", true);
+
+        var formData = new FormData();
+
+        formData.append('id', id);
+        formData.append('name', name);
+        formData.append('category', category);
+        formData.append('price', price);
+        formData.append('status', status);
+
+        formData.append('action', 'update_item');
+
+        $.ajax({
+            url: 'server',
+            data: formData,
+            type: 'POST',
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    $(".notification_alert").removeClass("d-none");
+                    $("#update_item_name").addClass("is-invalid");
+
+                    $(".main-form").removeClass("d-none");
+                    $(".loading").addClass("d-none");
+
+                    $("#update_item_submit").removeAttr("disabled");
+                }
+            },
+            error: function (_, _, error) {
+                console.error(error);
+            }
+        });
+    })
+
+    $("#update_item_name").keydown(function () {
+        $("#update_item_name").removeClass("is-invalid");
     })
 })

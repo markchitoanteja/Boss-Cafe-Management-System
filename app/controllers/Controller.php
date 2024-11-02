@@ -158,6 +158,109 @@ class Controller
         $this->response(true);
     }
 
+    private function new_item()
+    {
+        $name = post("name");
+        $category = post("category");
+        $price = post("price");
+        $status = post("status");
+
+        $success = false;
+
+        $data = [
+            "uuid" => $this->database->generate_uuid(),
+            "name" => $name,
+            "category" => $category,
+            "price" => $price,
+            "status" => $status,
+            "created_at" => date("Y-m-d H:i:s"),
+            "updated_at" => date("Y-m-d H:i:s"),
+        ];
+
+        $new_item_success = $this->database->insert("items", $data);
+
+        if ($new_item_success) {
+            $notification_message = [
+                "title" => "Success!",
+                "text" => "A new item was added successfully.",
+                "icon" => "success",
+            ];
+
+            session("notification", $notification_message);
+
+            $success = true;
+        }
+
+        $this->response($success);
+    }
+    
+    private function update_item()
+    {
+        $id = post("id");
+        $name = post("name");
+        $category = post("category");
+        $price = post("price");
+        $status = post("status");
+
+        $success = false;
+
+        $data = [
+            "name" => $name,
+            "category" => $category,
+            "price" => $price,
+            "status" => $status,
+            "updated_at" => date("Y-m-d H:i:s"),
+        ];
+
+        $update_item_success = $this->database->update("items", $data, ["id" => $id]);
+
+        if ($update_item_success) {
+            $notification_message = [
+                "title" => "Success!",
+                "text" => "An item was updated successfully.",
+                "icon" => "success",
+            ];
+
+            session("notification", $notification_message);
+
+            $success = true;
+        }
+
+        $this->response($success);
+    }
+
+    private function get_item_data()
+    {
+        $id = post("id");
+
+        $success = true;
+
+        $item_data = $this->database->select_one("items", ["id" => $id]);
+
+        $this->response($success, $item_data);
+    }
+
+    private function delete_item()
+    {
+        $id = post("id");
+
+        $success = false;
+
+        if ($this->database->delete("items", ["id" => $id])) {
+            $notification_message = [
+                "title" => "Success!",
+                "text" => "An item was deleted successfully.",
+                "icon" => "success",
+            ];
+
+            session("notification", $notification_message);
+
+            $success = true;
+        }
+
+        $this->response($success);
+    }
+
     private function logout()
     {
         $notification_message = [

@@ -10,6 +10,7 @@ class Model
         $this->connection = $this->database->connect();
 
         $this->create_users_table();
+        $this->create_items_table();
         $this->insert_admin_data();
     }
 
@@ -23,6 +24,24 @@ class Model
             password VARCHAR(255) NOT NULL,
             image VARCHAR(255) NOT NULL,
             user_type ENUM('admin', 'teacher', 'customer') NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )";
+
+        if (!$this->connection->query($sql) === TRUE) {
+            die("Error creating users table: " . $this->connection->error);
+        }
+    }
+
+    private function create_items_table()
+    {
+        $sql = "CREATE TABLE IF NOT EXISTS items (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            uuid CHAR(36) NOT NULL UNIQUE,
+            name VARCHAR(100) NOT NULL UNIQUE,
+            category VARCHAR(100) NOT NULL,
+            price FLOAT(11,2) NOT NULL,
+            status VARCHAR(11) NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         )";

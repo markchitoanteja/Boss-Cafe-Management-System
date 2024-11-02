@@ -19,6 +19,8 @@
     <script src="./assets/plugins/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="./assets/plugins/fastclick/lib/fastclick.js"></script>
     <script src="./assets/plugins/sweetalert2/js/sweetalert2.min.js"></script>
+    <script src="./assets/plugins/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="./assets/plugins/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
     <script src="./assets/js/custom.min.js"></script>
     <script src="./assets/js/main.js"></script>
 </body>
