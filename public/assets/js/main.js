@@ -347,4 +347,172 @@ jQuery(document).ready(function () {
     $("#update_item_name").keydown(function () {
         $("#update_item_name").removeClass("is-invalid");
     })
+
+    $(document).on("click", ".update_inventory", function () {
+        const item_id = $(this).attr("item_id");
+        const name = $(this).attr("item_name");
+        const category = $(this).attr("item_category");
+
+        $("#update_inventory_modal").modal("show");
+
+        $(".main-form").addClass("d-none");
+        $(".loading").removeClass("d-none");
+
+        $(".notification_alert").addClass("d-none");
+
+        var formData = new FormData();
+
+        formData.append('item_id', item_id);
+
+        formData.append('action', 'get_inventory_data');
+
+        $.ajax({
+            url: 'server',
+            data: formData,
+            type: 'POST',
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    $("#update_inventory_item_id").val(response.message.item_id);
+                    $("#update_inventory_name").text(name);
+                    $("#update_inventory_category").text(category);
+                    $("#update_inventory_stock_level").val(response.message.stock_level);
+                    $("#update_inventory_unit").val(response.message.unit);
+
+                    $(".main-form").removeClass("d-none");
+                    $(".loading").addClass("d-none");
+                }
+            },
+            error: function (_, _, error) {
+                console.error(error);
+            }
+        });
+    })
+
+    $("#update_inventory_form").submit(function () {
+        const item_id = $("#update_inventory_item_id").val();
+        const stock_level = $("#update_inventory_stock_level").val();
+        const unit = $("#update_inventory_unit").val();
+
+        if (stock_level < 0) {
+            $("#update_inventory_stock_level").addClass("is-invalid");
+            $(".notification_alert").removeClass("d-none");
+        } else {
+            $(".main-form").addClass("d-none");
+            $(".loading").removeClass("d-none");
+
+            $(".notification_alert").addClass("d-none");
+
+            $("#update_inventory_submit").attr("disabled", true);
+
+            var formData = new FormData();
+
+            formData.append('item_id', item_id);
+            formData.append('stock_level', stock_level);
+            formData.append('unit', unit);
+
+            formData.append('action', 'update_inventory');
+
+            $.ajax({
+                url: 'server',
+                data: formData,
+                type: 'POST',
+                dataType: 'JSON',
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response.success) {
+                        location.reload();
+                    }
+                },
+                error: function (_, _, error) {
+                    console.error(error);
+                }
+            });
+        }
+    })
+
+    $("#update_inventory_stock_level").keydown(function () {
+        $("#update_inventory_stock_level").removeClass("is-invalid");
+    })
+
+    $("#new_order_form").submit(function () {
+        const staff_id = $("#new_order_staff_id").val();
+        const customer_name = $("#new_order_customer_name").val();
+        const item_id = $("#new_order_item_id").val();
+        const quantity = $("#new_order_quantity").val();
+
+        $(".main-form").addClass("d-none");
+        $(".loading").removeClass("d-none");
+
+        $(".notification_alert").addClass("d-none");
+
+        $("#new_order_submit").attr("disabled", true);
+
+        var formData = new FormData();
+
+        formData.append('staff_id', staff_id);
+        formData.append('customer_name', customer_name);
+        formData.append('item_id', item_id);
+        formData.append('quantity', quantity);
+
+        formData.append('action', 'new_order');
+
+        $.ajax({
+            url: 'server',
+            data: formData,
+            type: 'POST',
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    location.reload();
+                }
+            },
+            error: function (_, _, error) {
+                console.error(error);
+            }
+        });
+    })
+
+    $(document).on("click", ".restore_backup", function () {
+        var backup_file = $(this).data("filename");
+
+        Swal.fire({
+            title: "Confirm Restore",
+            text: "You are about to restore the database to the selected point: " + backup_file + ". Do you want to proceed?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, restore",
+            cancelButtonText: "Cancel"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var formData = new FormData();
+
+                formData.append('backup_file', backup_file);
+
+                formData.append('action', 'restore_database');
+
+                $.ajax({
+                    url: 'server',
+                    data: formData,
+                    type: 'POST',
+                    dataType: 'JSON',
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        location.reload();
+                    },
+                    error: function (_, _, error) {
+                        console.error("AJAX Error: ", error);
+                    }
+                });
+            }
+        });
+    })
 })

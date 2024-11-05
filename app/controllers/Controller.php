@@ -167,7 +167,7 @@ class Controller
 
         $success = false;
 
-        $data = [
+        $item_data = [
             "uuid" => $this->database->generate_uuid(),
             "name" => $name,
             "category" => $category,
@@ -177,23 +177,38 @@ class Controller
             "updated_at" => date("Y-m-d H:i:s"),
         ];
 
-        $new_item_success = $this->database->insert("items", $data);
+        $new_item_success = $this->database->insert("items", $item_data);
 
         if ($new_item_success) {
-            $notification_message = [
-                "title" => "Success!",
-                "text" => "A new item was added successfully.",
-                "icon" => "success",
+            $item_id = $this->database->get_last_insert_id();
+
+            $inventory_data = [
+                "uuid" => $this->database->generate_uuid(),
+                "item_id" => $item_id,
+                "stock_level" => 0,
+                "unit" => "kg",
+                "created_at" => date("Y-m-d H:i:s"),
+                "updated_at" => date("Y-m-d H:i:s"),
             ];
 
-            session("notification", $notification_message);
+            $new_inventory_success = $this->database->insert("inventories", $inventory_data);
 
-            $success = true;
+            if ($new_inventory_success) {
+                $notification_message = [
+                    "title" => "Success!",
+                    "text" => "A new item was added successfully.",
+                    "icon" => "success",
+                ];
+
+                session("notification", $notification_message);
+
+                $success = true;
+            }
         }
 
         $this->response($success);
     }
-    
+
     private function update_item()
     {
         $id = post("id");
@@ -240,13 +255,24 @@ class Controller
         $this->response($success, $item_data);
     }
 
+    private function get_inventory_data()
+    {
+        $item_id = post("item_id");
+
+        $success = true;
+
+        $item_data = $this->database->select_one("inventories", ["item_id" => $item_id]);
+
+        $this->response($success, $item_data);
+    }
+
     private function delete_item()
     {
         $id = post("id");
 
         $success = false;
 
-        if ($this->database->delete("items", ["id" => $id])) {
+        if ($this->database->delete("items", ["id" => $id]) && $this->database->delete("inventories", ["item_id" => $id])) {
             $notification_message = [
                 "title" => "Success!",
                 "text" => "An item was deleted successfully.",
@@ -259,6 +285,112 @@ class Controller
         }
 
         $this->response($success);
+    }
+
+    private function update_inventory()
+    {
+        $item_id = post("item_id");
+        $stock_level = post("stock_level");
+        $unit = post("unit");
+
+        $success = false;
+
+        $data = [
+            "stock_level" => $stock_level,
+            "unit" => $unit,
+            "updated_at" => date("Y-m-d H:i:s"),
+        ];
+
+        $update_inventory_success = $this->database->update("inventories", $data, ["item_id" => $item_id]);
+
+        if ($update_inventory_success) {
+            $notification_message = [
+                "title" => "Success!",
+                "text" => "An inventory was updated successfully.",
+                "icon" => "success",
+            ];
+
+            session("notification", $notification_message);
+
+            $success = true;
+        }
+
+        $this->response($success);
+    }
+
+    private function new_order()
+    {
+        $staff_id = post("staff_id");
+        $customer_name = post("customer_name");
+        $item_id = post("item_id");
+        $quantity = post("quantity");
+
+        $success = false;
+
+        $item_price = $this->database->select_one("items", ["id" => $item_id])["price"];
+
+        $total_price = $item_price * $quantity;
+
+        $data = [
+            "uuid" => $this->database->generate_uuid(),
+            "staff_id" => $staff_id,
+            "customer_name" => $customer_name,
+            "item_id" => $item_id,
+            "quantity" => $quantity,
+            "total_price" => $total_price,
+            "status" => "Completed",
+            "created_at" => date("Y-m-d H:i:s"),
+            "updated_at" => date("Y-m-d H:i:s"),
+        ];
+
+        $new_order_success = $this->database->insert("orders", $data);
+
+        if ($new_order_success) {
+            $notification_message = [
+                "title" => "Success!",
+                "text" => "Order was placed successfully.",
+                "icon" => "success",
+            ];
+
+            session("notification", $notification_message);
+
+            $success = true;
+        }
+
+        $this->response($success);
+    }
+
+    private function restore_database()
+    {
+        $backup_file = basename(post("backup_file"));
+        $backup_dir = 'backup/';
+        $file_path = $backup_dir . $backup_file;
+
+        if (!file_exists($file_path)) {
+            $notification_message = [
+                "title" => "Oops..",
+                "text" => "The backup file does not exists!",
+                "icon" => "error",
+            ];
+        } else {
+            if ($this->database->restore($file_path)) {
+                $notification_message = [
+                    "title" => "Success!",
+                    "text" => "Database restored successfully from $backup_file.",
+                    "icon" => "success",
+                ];
+            } else {
+                $notification_message = [
+                    "title" => "Oops..",
+                    "text" => "There was an error while processing your request.",
+                    "icon" => "error",
+                ];
+            }
+        }
+
+        session("notification", $notification_message);
+
+        $this->response(true);
     }
 
     private function logout()

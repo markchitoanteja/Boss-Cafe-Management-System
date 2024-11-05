@@ -42,7 +42,7 @@ if (!session("user_id")) {
                     <div class="navbar nav_title" style="border: 0;">
                         <a href="" class="site_title">
                             <img src="./assets/img/logo.png" alt="..." class="img-circle bg-white" style="width: 34px; height: 34px;">
-                            <span>Boss Cafe</span>
+                            <span>Boss Cafe MS</span>
                         </a>
                     </div>
 
@@ -82,15 +82,15 @@ if (!session("user_id")) {
                             </ul>
                         </div>
                         <div class="menu_section">
-                            <h3>Customer Management</h3>
+                            <h3>Reports & Analytics</h3>
                             <ul class="nav side-menu">
-                                <li><a href="customers"><i class="fa fa-users"></i> Customers </a></li>
+                                <li><a href="customer_reports"><i class="fa fa-file-text-o"></i> Customer Reports </a></li>
                             </ul>
                         </div>
                         <div class="menu_section">
-                            <h3>Reports & Analytics</h3>
+                            <h3>Database</h3>
                             <ul class="nav side-menu">
-                                <li><a href="reports"><i class="fa fa-file-text-o"></i> Reports </a></li>
+                                <li><a href="backup_and_restore"><i class="fa fa-database"></i> Backup and Restore </a></li>
                             </ul>
                         </div>
                     </div>

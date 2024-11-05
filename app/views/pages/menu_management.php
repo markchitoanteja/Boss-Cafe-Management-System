@@ -44,10 +44,10 @@
                                             <td><?= $item["name"] ?></td>
                                             <td><?= $item["category"] ?></td>
                                             <td><i class="fa fa-peso"></i> <?= $item["price"] ?></td>
-                                            <td><?= $item["status"] ?></td>
+                                            <td class="text-<?= $item["status"] == "Available" ? "success" : "danger" ?>"><?= $item["status"] ?></td>
                                             <td>
-                                                <a href="javascript:void(0)" class="update_item" item_id="<?= $item["id"] ?>">
-                                                    <i class="fa fa-pencil mr-1 text-success"></i>
+                                                <a href="javascript:void(0)" class="mr-1 update_item" item_id="<?= $item["id"] ?>">
+                                                    <i class="fa fa-pencil text-success"></i>
                                                 </a>
                                                 <a href="javascript:void(0)" class="delete_item" item_id="<?= $item["id"] ?>">
                                                     <i class="fa fa-trash text-danger"></i>

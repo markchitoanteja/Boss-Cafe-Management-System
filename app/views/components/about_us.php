@@ -27,6 +27,8 @@
                 <ul class="list-unstyled">
                     <li>Merillo, Haide Mae G.</li>
                     <li>Rodriguez, Ryan M.</li>
+                    <li>Lagartija, Ivy Mae</li>
+                    <li>Gales, Arnel</li>
                 </ul>
             </div>
             <div class="modal-footer">

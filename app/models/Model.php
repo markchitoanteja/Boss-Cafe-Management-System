@@ -11,6 +11,8 @@ class Model
 
         $this->create_users_table();
         $this->create_items_table();
+        $this->create_inventories_table();
+        $this->create_orders_table();
         $this->insert_admin_data();
     }
 
@@ -42,6 +44,43 @@ class Model
             category VARCHAR(100) NOT NULL,
             price FLOAT(11,2) NOT NULL,
             status VARCHAR(11) NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )";
+
+        if (!$this->connection->query($sql) === TRUE) {
+            die("Error creating users table: " . $this->connection->error);
+        }
+    }
+    
+    private function create_inventories_table()
+    {
+        $sql = "CREATE TABLE IF NOT EXISTS inventories (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            uuid CHAR(36) NOT NULL UNIQUE,
+            item_id INT(11) NOT NULL UNIQUE,
+            stock_level FLOAT(11, 2) NOT NULL,
+            unit VARCHAR(10) NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )";
+
+        if (!$this->connection->query($sql) === TRUE) {
+            die("Error creating users table: " . $this->connection->error);
+        }
+    }
+    
+    private function create_orders_table()
+    {
+        $sql = "CREATE TABLE IF NOT EXISTS orders (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            uuid CHAR(36) NOT NULL UNIQUE,
+            staff_id INT(11) NOT NULL,
+            customer_name VARCHAR(30) NOT NULL,
+            item_id INT(11) NOT NULL,
+            quantity INT(11) NOT NULL,
+            total_price FLOAT(11, 2) NOT NULL,
+            status VARCHAR(10) NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         )";

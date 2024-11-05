@@ -5,6 +5,9 @@ $routes = [
     'login' => '../app/views/auth/login.php',
     'dashboard' => '../app/views/pages/dashboard.php',
     'menu_management' => '../app/views/pages/menu_management.php',
+    'inventory' => '../app/views/pages/inventory.php',
+    'orders' => '../app/views/pages/orders.php',
+    'backup_and_restore' => '../app/views/pages/backup_and_restore.php',
 
     // Server
     'server' => '../app/controllers/Controller.php',

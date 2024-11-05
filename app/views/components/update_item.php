@@ -30,8 +30,15 @@
                             <label for="update_item_category">Category</label>
                             <select class="form-control" id="update_item_category" required>
                                 <option value="Coffee">Coffee</option>
-                                <option value="Tea">Tea</option>
-                                <option value="Pastries">Pastries</option>
+                                <option value="Iced Coffee">Iced Coffee</option>
+                                <option value="Coffee Blended Frappe">Coffee Blended Frappe</option>
+                                <option value="Pasta">Pasta</option>
+                                <option value="Fries and Mofos">Fries and Mofos</option>
+                                <option value="Rice Bowl">Rice Bowl</option>
+                                <option value="Sandwiches and Burgers">Sandwiches and Burgers</option>
+                                <option value="All-Day Breakfast">All-Day Breakfast</option>
+                                <option value="Fruit Coolers">Fruit Coolers</option>
+                                <option value="Milk Tea">Milk Tea</option>
                             </select>
                         </div>
                         <div class="form-group">
