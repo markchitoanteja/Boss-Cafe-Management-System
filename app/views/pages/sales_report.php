@@ -22,17 +22,41 @@ function create_order_id(string $id)
 {
     return "#" . str_pad($id, 5, '0', STR_PAD_LEFT);
 }
+
+$database = new Database();
+
+$sql = "SELECT SUM(total_price) AS total_sales FROM orders WHERE status = ?";
+$result = $database->query($sql, ["completed"]);
+
+$total_sales = $result[0]['total_sales'] ?? "0.00";
+
+$sql_2 = "SELECT SUM(total_price) / COUNT(*) AS average_order_value FROM orders";
+$result_2 = $database->query($sql_2);
+
+$average_order_value = $result_2[0]["average_order_value"];
+
+$sql_3 = "SELECT items.name, COUNT(orders.item_id) AS total_quantity FROM orders JOIN items ON orders.item_id = items.id GROUP BY items.id ORDER BY total_quantity DESC LIMIT 1";
+$result_3 = $database->query($sql_3);
+
+if ($result_3) {
+    $top_product = $result_3[0]["name"];
+} else {
+    $top_product = "Not Yet Available";
+}
 ?>
 
 <div class="right_col" role="main">
     <div class="">
         <div class="page-title">
             <div class="title_left">
-                <h3>Orders</h3>
+                <h3>Sales Report</h3>
             </div>
             <div class="title_right text-right">
-                <button class="btn btn-primary" data-toggle="modal" data-target="#new_order_modal">
-                    <i class="fa fa-plus"></i> Add New Order
+                <button class="btn btn-success" id="print_report">
+                    <i class="fa fa-print"></i> Print Report
+                </button>
+                <button class="btn btn-primary" id="export_as_pdf">
+                    <i class="fa fa-download"></i> Export as PDF
                 </button>
             </div>
         </div>
@@ -40,10 +64,49 @@ function create_order_id(string $id)
         <div class="clearfix"></div>
 
         <div class="row">
+            <div class="col-lg-3">
+                <div class="x_panel" style="background-color: #4caf50; color: white;">
+                    <div class="x_title">
+                        <h2>Total Sales</h2>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <h3><i class="fa fa-peso"></i> <?= number_format($total_sales, 2) ?></h3>
+                        <p>Total sales for all time period.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="x_panel" style="background-color: #ff9800; color: white;">
+                    <div class="x_title">
+                        <h2>Average Order Value</h2>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <h3><i class="fa fa-peso"></i> <?= number_format($average_order_value, 2) ?></h3>
+                        <p>Average sales per order.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="x_panel" style="background-color: #9c27b0; color: white;">
+                    <div class="x_title">
+                        <h2>Top Product</h2>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <h3><?= $top_product ?></h3>
+                        <p>Most ordered item.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
             <div class="col-md-12 col-sm-12">
                 <div class="x_panel">
                     <div class="x_title">
-                        <h2>Current Orders</h2>
+                        <h2>Detailed Sales Report</h2>
                         <div class="clearfix"></div>
                     </div>
                     <div class="x_content">
@@ -57,14 +120,10 @@ function create_order_id(string $id)
                                     <th>Quantity</th>
                                     <th>Total Price</th>
                                     <th>Status</th>
-                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php
-                                $database = new Database();
-                                $orders = $database->select_all("orders", "id", "DESC");
-                                ?>
+                                <?php $orders = $database->select_all("orders", "id", "DESC") ?>
 
                                 <?php if ($orders): ?>
                                     <?php foreach ($orders as $order): ?>
@@ -76,11 +135,6 @@ function create_order_id(string $id)
                                             <td><?= $order["quantity"] ?> PC<?= $order["quantity"] > 1 ? "S" : null ?></td>
                                             <td><i class="fa fa-peso"></i> <?= $order["total_price"] ?></td>
                                             <td class="text-<?= $order["status"] == "Completed" ? "success" : "danger" ?>"><?= $order["status"] ?></td>
-                                            <td>
-                                                <a href="javascript:void(0)" class="btn btn-sm btn-success update_order" order_id="<?= $order["id"] ?>">
-                                                    <i class="fa fa-pencil"></i> Update Order
-                                                </a>
-                                            </td>
                                         </tr>
                                     <?php endforeach ?>
                                 <?php endif ?>
@@ -92,7 +146,3 @@ function create_order_id(string $id)
         </div>
     </div>
 </div>
-
-<?php include_once "../app/views/components/new_order.php" ?>
-<?php include_once "../app/views/components/update_order.php" ?>
-<?php include_once "../app/views/components/check_admin.php" ?>

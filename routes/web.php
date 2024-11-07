@@ -8,6 +8,8 @@ $routes = [
     'inventory' => '../app/views/pages/inventory.php',
     'orders' => '../app/views/pages/orders.php',
     'backup_and_restore' => '../app/views/pages/backup_and_restore.php',
+    'sales_report' => '../app/views/pages/sales_report.php',
+    'customer_reports' => '../app/views/pages/customer_reports.php',
 
     // Server
     'server' => '../app/controllers/Controller.php',

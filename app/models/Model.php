@@ -13,6 +13,8 @@ class Model
         $this->create_items_table();
         $this->create_inventories_table();
         $this->create_orders_table();
+        $this->create_customers_table();
+        $this->create_logs_table();
         $this->insert_admin_data();
     }
 
@@ -81,6 +83,37 @@ class Model
             quantity INT(11) NOT NULL,
             total_price FLOAT(11, 2) NOT NULL,
             status VARCHAR(10) NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )";
+
+        if (!$this->connection->query($sql) === TRUE) {
+            die("Error creating users table: " . $this->connection->error);
+        }
+    }
+    
+    private function create_customers_table()
+    {
+        $sql = "CREATE TABLE IF NOT EXISTS customers (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            uuid CHAR(36) NOT NULL UNIQUE,
+            name VARCHAR(30) NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )";
+
+        if (!$this->connection->query($sql) === TRUE) {
+            die("Error creating users table: " . $this->connection->error);
+        }
+    }
+    
+    private function create_logs_table()
+    {
+        $sql = "CREATE TABLE IF NOT EXISTS logs (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            uuid CHAR(36) NOT NULL UNIQUE,
+            user_id INT(11) NOT NULL,
+            activity TEXT NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         )";

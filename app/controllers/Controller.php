@@ -21,6 +21,19 @@ class Controller
         }
     }
 
+    private function create_log($user_id, $activity)
+    {
+        $data = [
+            "uuid" => $this->database->generate_uuid(),
+            "user_id" => $user_id,
+            "activity" => $activity,
+            "created_at" => date("Y-m-d H:i:s"),
+            "updated_at" => date("Y-m-d H:i:s"),
+        ];
+
+        $this->database->insert("logs", $data);
+    }
+
     private function login()
     {
         $username = post("username");
@@ -36,6 +49,8 @@ class Controller
             if (password_verify($password, $db_password)) {
                 session("user_id", $user_data["id"]);
                 session("user_type", $user_data["user_type"]);
+
+                $this->create_log(session('user_id'), 'User logged in with username: ' . $username);
 
                 $success = true;
             }
@@ -65,9 +80,9 @@ class Controller
         $name = post("name");
         $username = post("username");
         $password = post("password");
-        
+
         $success = false;
-        
+
         $data = [
             "uuid" => $this->database->generate_uuid(),
             "name" => $name,
@@ -81,8 +96,10 @@ class Controller
 
         $this->database->insert("users", $data);
 
+        $this->create_log(session('user_id'), 'Registered new user with username: ' . $username . ' and name: ' . $name);
+
         $success = true;
-        
+
         $this->response($success);
     }
 
@@ -129,6 +146,8 @@ class Controller
 
             session("notification", $notification_message);
 
+            $this->create_log(session('user_id'), 'Updated user account for ID: ' . $id . ' with new name: ' . $name . ' and username: ' . $username);
+
             $success = true;
         }
 
@@ -147,6 +166,8 @@ class Controller
             ];
 
             session("notification", $notification_message);
+
+            $this->create_log(session('user_id'), 'Created a backup of the database');
         }
 
         $this->response(true);
@@ -196,6 +217,8 @@ class Controller
 
                 session("notification", $notification_message);
 
+                $this->create_log(session('user_id'), 'Added new item: ' . $name . ' (Category: ' . $category . ', Price: ' . $price . ')');
+
                 $success = true;
             }
         }
@@ -233,6 +256,8 @@ class Controller
             session("notification", $notification_message);
 
             $success = true;
+
+            $this->create_log(session('user_id'), 'Updated item ID: ' . $id . ' with new name: ' . $name . ', category: ' . $category . ', price: ' . $price);
         }
 
         $this->response($success);
@@ -275,6 +300,8 @@ class Controller
 
             session("notification", $notification_message);
 
+            $this->create_log(session('user_id'), 'Deleted item ID: ' . $id);
+
             $success = true;
         }
 
@@ -306,6 +333,8 @@ class Controller
 
             session("notification", $notification_message);
 
+            $this->create_log(session('user_id'), 'Updated inventory for item ID: ' . $item_id . ' with new stock level: ' . $stock_level . ' and unit: ' . $unit);
+
             $success = true;
         }
 
@@ -325,7 +354,7 @@ class Controller
 
         $total_price = $item_price * $quantity;
 
-        $data = [
+        $order_data = [
             "uuid" => $this->database->generate_uuid(),
             "staff_id" => $staff_id,
             "customer_name" => $customer_name,
@@ -337,9 +366,22 @@ class Controller
             "updated_at" => date("Y-m-d H:i:s"),
         ];
 
-        $new_order_success = $this->database->insert("orders", $data);
+        $new_order_success = $this->database->insert("orders", $order_data);
 
         if ($new_order_success) {
+            $customer_exists = $this->database->select_one("customers", ["name" => $customer_name]);
+
+            if (!$customer_exists) {
+                $customer_data = [
+                    "uuid" => $this->database->generate_uuid(),
+                    "name" => $customer_name,
+                    "created_at" => date("Y-m-d H:i:s"),
+                    "updated_at" => date("Y-m-d H:i:s"),
+                ];
+
+                $this->database->insert("customers", $customer_data);
+            }
+
             $notification_message = [
                 "title" => "Success!",
                 "text" => "Order was placed successfully.",
@@ -347,6 +389,8 @@ class Controller
             ];
 
             session("notification", $notification_message);
+
+            $this->create_log(session('user_id'), 'Placed new order with customer: ' . $customer_name . ' for item ID: ' . $item_id . ' with quantity: ' . $quantity . ' and total price: ' . $total_price);
 
             $success = true;
         }
@@ -373,6 +417,8 @@ class Controller
                     "text" => "Database restored successfully from $backup_file.",
                     "icon" => "success",
                 ];
+
+                $this->create_log(session('user_id'), 'Restored database from backup file: ' . $backup_file);
             } else {
                 $notification_message = [
                     "title" => "Oops..",
@@ -445,6 +491,8 @@ class Controller
 
             session("notification", $notification_message);
 
+            $this->create_log(session('user_id'), 'Updated order ID: ' . $id . ' with new customer name: ' . $customer_name . ', item ID: ' . $item_id . ', quantity: ' . $quantity . ', and status: ' . $status);
+
             $success = true;
         }
 
@@ -460,6 +508,8 @@ class Controller
 
         session("notification", $notification_message);
 
+        $this->create_log(session('user_id'), 'User logged out');
+        
         session("user_id", "unset");
 
         $this->response(true, null);

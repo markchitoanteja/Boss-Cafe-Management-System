@@ -652,4 +652,42 @@ jQuery(document).ready(function () {
             }
         });
     })
+
+    $("#export_as_pdf").click(function () {
+        const { jsPDF } = window.jspdf;
+
+        let element = document.querySelector('.right_col');
+
+        html2canvas(element).then((canvas) => {
+            const pdf = new jsPDF("p", "mm", "a4");
+            const imgData = canvas.toDataURL("image/png");
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save("Sales_Report.pdf");
+        });
+    })
+
+    $("#print_report").click(function () {
+        const { jsPDF } = window.jspdf;
+
+        let element = document.querySelector('.right_col');
+
+        html2canvas(element).then((canvas) => {
+            let imgData = canvas.toDataURL("image/png");
+
+            let printWindow = window.open('', '_blank');
+            
+            printWindow.document.write('<html><head><title>Print</title></head><body>');
+            printWindow.document.write('<img src="' + imgData + '" style="width:100%;">');
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+
+            printWindow.onload = function () {
+                printWindow.print();
+                printWindow.close();
+            };
+        });
+    })
 })

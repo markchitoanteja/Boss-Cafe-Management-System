@@ -81,7 +81,16 @@ $total_sales = $result[0]['total_sales'] ?? "0.00";
                                     </tr>
                                 </thead>
                                 <tbody>
-
+                                    <?php $logs = $database->select_all("logs", "id", "DESC") ?>
+                                    <?php if ($logs): ?>
+                                        <?php foreach ($logs as $log): ?>
+                                            <tr class="text-center">
+                                                <td><?= date("F j, Y g:i A", strtotime($log["created_at"])) ?></td>
+                                                <td><?= $database->select_one("users", ["id" => $log["user_id"]])["name"] ?></td>
+                                                <td><?= $log["activity"] ?></td>
+                                            </tr>
+                                        <?php endforeach ?>
+                                    <?php endif ?>
                                 </tbody>
                             </table>
                         </div>

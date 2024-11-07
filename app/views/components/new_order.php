@@ -28,8 +28,16 @@
                         </div>
 
                         <div class=" form-group">
+                            <?php $customers = $database->select_all("customers", "name", "ASC") ?>
                             <label for="new_order_customer_name">Customer Name</label>
-                            <input type="text" class="form-control" id="new_order_customer_name" required>
+                            <input type="text" class="form-control" list="<?= $customers ? "customers" : null ?>" id="new_order_customer_name" required>
+                            <datalist id="customers">
+                                <?php if ($customers): ?>
+                                    <?php foreach ($customers as $customer): ?>
+                                        <option value="<?= $customer["name"] ?>">
+                                    <?php endforeach ?>
+                                <?php endif ?>
+                            </datalist>
                         </div>
 
                         <div class="form-group">
