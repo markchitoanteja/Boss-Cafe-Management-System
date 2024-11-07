@@ -7,6 +7,14 @@ jQuery(document).ready(function () {
         });
     }
 
+    $(".not_allowed").click(function () {
+        Swal.fire({
+            title: "Oops...",
+            text: "Operation not allowed for non-admin users!",
+            icon: "error"
+        });
+    })
+
     $(".logout").click(function () {
         var formData = new FormData();
 
@@ -512,6 +520,135 @@ jQuery(document).ready(function () {
                         console.error("AJAX Error: ", error);
                     }
                 });
+            }
+        });
+    })
+
+    $(document).on("click", ".update_order", function () {
+        const order_id = $(this).attr("order_id");
+
+        $("#check_admin_order_id").val(order_id);
+
+        $("#check_admin_modal").modal("show");
+    })
+
+    $("#check_admin_form").submit(function () {
+        const order_id = $("#check_admin_order_id").val();
+        const username = $("#check_admin_username").val();
+        const password = $("#check_admin_password").val();
+
+        $(".main-form").addClass("d-none");
+        $(".loading").removeClass("d-none");
+
+        $(".notification_alert").addClass("d-none");
+
+        $("#check_admin_submit").attr("disabled", true);
+
+        var formData = new FormData();
+
+        formData.append('username', username);
+        formData.append('password', password);
+
+        formData.append('action', 'check_admin');
+
+        $.ajax({
+            url: 'server',
+            data: formData,
+            type: 'POST',
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    $("#check_admin_modal").modal("hide");
+
+                    $("#update_order_modal").modal("show");
+
+                    $(".main-form").addClass("d-none");
+                    $(".loading").removeClass("d-none");
+
+                    $(".notification_alert").addClass("d-none");
+
+                    var formData = new FormData();
+
+                    formData.append('order_id', order_id);
+
+                    formData.append('action', 'get_order_data');
+
+                    $.ajax({
+                        url: 'server',
+                        data: formData,
+                        type: 'POST',
+                        dataType: 'JSON',
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                            $("#update_order_id").val(response.message.id);
+                            $("#update_order_customer_name").val(response.message.customer_name);
+                            $("#update_order_item_id").val(response.message.item_id);
+                            $("#update_order_quantity").val(response.message.quantity);
+                            $("#update_order_status").val(response.message.status);
+
+                            $(".main-form").removeClass("d-none");
+                            $(".loading").addClass("d-none");
+                        },
+                        error: function (_, _, error) {
+                            console.error(error);
+                        }
+                    });
+                } else {
+                    $(".notification_alert").removeClass("d-none");
+
+                    $("#check_admin_submit").removeAttr("disabled");
+
+                    $(".main-form").removeClass("d-none");
+                    $(".loading").addClass("d-none");
+                }
+            },
+            error: function (_, _, error) {
+                console.error(error);
+            }
+        });
+    })
+
+    $("#update_order_form").submit(function () {
+        const id = $("#update_order_id").val();
+        const customer_name = $("#update_order_customer_name").val();
+        const item_id = $("#update_order_item_id").val();
+        const quantity = $("#update_order_quantity").val();
+        const status = $("#update_order_status").val();
+
+        $(".main-form").addClass("d-none");
+        $(".loading").removeClass("d-none");
+
+        $(".notification_alert").addClass("d-none");
+
+        $("#update_order_submit").attr("disabled", true);
+
+        var formData = new FormData();
+
+        formData.append('id', id);
+        formData.append('customer_name', customer_name);
+        formData.append('item_id', item_id);
+        formData.append('quantity', quantity);
+        formData.append('status', status);
+
+        formData.append('action', 'update_order');
+
+        $.ajax({
+            url: 'server',
+            data: formData,
+            type: 'POST',
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    location.reload();
+                }
+            },
+            error: function (_, _, error) {
+                console.error(error);
             }
         });
     })

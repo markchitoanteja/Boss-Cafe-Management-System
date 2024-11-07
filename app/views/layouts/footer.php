@@ -12,6 +12,7 @@
 
     <script>
         var user_id = "<?= session("user_id") ?>";
+        var user_type = "<?= session("user_type") ?>";
         var notification = <?= session("notification") ? json_encode(session("notification")) : json_encode(null) ?>;
     </script>
 

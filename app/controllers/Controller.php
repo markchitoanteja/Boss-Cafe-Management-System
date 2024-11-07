@@ -35,6 +35,7 @@ class Controller
 
             if (password_verify($password, $db_password)) {
                 session("user_id", $user_data["id"]);
+                session("user_type", $user_data["user_type"]);
 
                 $success = true;
             }
@@ -61,42 +62,35 @@ class Controller
 
     private function register()
     {
-        $admin_password = post("admin_password");
         $name = post("name");
         $username = post("username");
         $password = post("password");
-
-        $hash = $this->database->select_one("users", ["id", "1"])["password"];
-
+        
         $success = false;
-        $message = "Invalid administrator password!";
+        
+        $data = [
+            "uuid" => $this->database->generate_uuid(),
+            "name" => $name,
+            "username" => $username,
+            "password" => password_hash($password, PASSWORD_BCRYPT),
+            "image" => "default-user-image.png",
+            "user_type" => "employee",
+            "created_at" => date("Y-m-d H:i:s"),
+            "updated_at" => date("Y-m-d H:i:s"),
+        ];
 
-        if (password_verify($admin_password, $hash)) {
-            $data = [
-                "uuid" => $this->database->generate_uuid(),
-                "name" => $name,
-                "username" => $username,
-                "password" => password_hash($password, PASSWORD_BCRYPT),
-                "image" => "default-user-image.png",
-                "user_type" => "employee",
-                "created_at" => date("Y-m-d H:i:s"),
-                "updated_at" => date("Y-m-d H:i:s"),
-            ];
+        $this->database->insert("users", $data);
 
-            $this->database->insert("users", $data);
-
-            $success = true;
-            $message = "A new account has been saved successfully!";
-        }
-
-        $this->response($success, $message);
+        $success = true;
+        
+        $this->response($success);
     }
 
     private function get_user_data()
     {
         $id = post("id");
 
-        $user_data = $this->database->select_one("users", ["id", $id]);
+        $user_data = $this->database->select_one("users", ["id" => $id]);
 
         $this->response(true, $user_data);
     }
@@ -391,6 +385,70 @@ class Controller
         session("notification", $notification_message);
 
         $this->response(true);
+    }
+
+    private function get_order_data()
+    {
+        $order_id = post("order_id");
+
+        $success = true;
+
+        $order_data = $this->database->select_one("orders", ["id" => $order_id]);
+
+        $this->response($success, $order_data);
+    }
+
+    private function check_admin()
+    {
+        $username = post("username");
+        $password = post("password");
+
+        $success = false;
+
+        $admin_data = $this->database->select_one("users", ["username" => $username]);
+
+        if ($admin_data) {
+            $db_password = $admin_data["password"];
+
+            if (password_verify($password, $db_password)) {
+                $success = true;
+            }
+        }
+
+        $this->response($success);
+    }
+
+    private function update_order()
+    {
+        $id = post("id");
+        $customer_name = post("customer_name");
+        $item_id = post("item_id");
+        $quantity = post("quantity");
+        $status = post("status");
+
+        $success = false;
+
+        $data = [
+            "customer_name" => $customer_name,
+            "item_id" => $item_id,
+            "quantity" => $quantity,
+            "status" => $status,
+            "updated_at" => date("Y-m-d H:i:s"),
+        ];
+
+        if ($this->database->update("orders", $data, ["id" => $id])) {
+            $notification_message = [
+                "title" => "Success!",
+                "text" => "An order was updated successfully!",
+                "icon" => "success",
+            ];
+
+            session("notification", $notification_message);
+
+            $success = true;
+        }
+
+        $this->response($success);
     }
 
     private function logout()

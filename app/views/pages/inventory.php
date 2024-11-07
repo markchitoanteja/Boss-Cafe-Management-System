@@ -53,7 +53,9 @@ function units($abbrv, $stock_level)
                                     <th>Item Name</th>
                                     <th>Category</th>
                                     <th>Stock Level</th>
-                                    <th>Actions</th>
+                                    <?php if ($user_type == "admin"): ?>
+                                        <th>Actions</th>
+                                    <?php endif ?>
                                 </tr>
                             </thead>
                             <tbody>
@@ -68,11 +70,13 @@ function units($abbrv, $stock_level)
                                             <td><?= $inventory["name"] ?></td>
                                             <td><?= $inventory["category"] ?></td>
                                             <td class="<?= $inventory["stock_level"] == 0 ? "text-danger" : null ?>"><?= $inventory["stock_level"] ?> <?= units($inventory["unit"], $inventory["stock_level"]) ?></td>
-                                            <td>
-                                                <a href="javascript:void(0)" class="btn btn-sm btn-success update_inventory" item_id="<?= $inventory["item_id"] ?>" item_name="<?= $inventory["name"] ?>" item_category="<?= $inventory["category"] ?>">
-                                                    <i class="fa fa-pencil"></i> Update Inventory
-                                                </a>
-                                            </td>
+                                            <?php if ($user_type == "admin"): ?>
+                                                <td>
+                                                    <a href="javascript:void(0)" class="btn btn-sm btn-success update_inventory" item_id="<?= $inventory["item_id"] ?>" item_name="<?= $inventory["name"] ?>" item_category="<?= $inventory["category"] ?>">
+                                                        <i class="fa fa-pencil"></i> Update Inventory
+                                                    </a>
+                                                </td>
+                                            <?php endif ?>
                                         </tr>
                                     <?php endforeach ?>
                                 <?php endif ?>

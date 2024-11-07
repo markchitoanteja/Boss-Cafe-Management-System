@@ -92,3 +92,5 @@ function create_order_id(string $id)
 </div>
 
 <?php include_once "../app/views/components/new_order.php" ?>
+<?php include_once "../app/views/components/update_order.php" ?>
+<?php include_once "../app/views/components/check_admin.php" ?>

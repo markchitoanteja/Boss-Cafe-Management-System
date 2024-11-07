@@ -28,7 +28,7 @@ jQuery(document).ready(function () {
             $("#login_notification").removeClass("alert-danger");
             $("#login_notification").removeClass("alert-success");
             $("#login_notification").addClass("d-none");
-            
+
             $("#notification").addClass("d-none");
 
             formData.append('username', username);
@@ -86,6 +86,7 @@ jQuery(document).ready(function () {
         $("#login_notification").removeClass("alert-danger");
         $("#login_notification").removeClass("alert-success");
         $("#login_notification").addClass("d-none");
+        $("#notification").addClass("d-none");
     })
 
     $("#register_submit").click(function () {
@@ -152,63 +153,15 @@ jQuery(document).ready(function () {
                     contentType: false,
                     success: function (response) {
                         if (response.success) {
-                            Swal.fire({
-                                title: "Administrator Password",
-                                input: "password",
-                                inputAttributes: {
-                                    autocapitalize: "off"
-                                },
-                                showCancelButton: true,
-                                confirmButtonText: "Confirm",
-                                showLoaderOnConfirm: false,
-                                allowOutsideClick: () => !Swal.isLoading()
-                            }).then((admin_password) => {
-                                $(".login_wrapper").addClass("d-none");
-                                $(".loading").removeClass("d-none");
+                            const data = {
+                                "name": name,
+                                "username": username,
+                                "password": password,
+                            };
 
-                                $("#login_notification").removeClass("alert-danger");
-                                $("#login_notification").removeClass("alert-success");
-                                $("#login_notification").addClass("d-none");
+                            $("#check_admin_data").val(JSON.stringify(data));
 
-                                var formData_2 = new FormData();
-
-                                formData_2.append('admin_password', admin_password.value);
-                                formData_2.append('name', name);
-                                formData_2.append('username', username);
-                                formData_2.append('password', password);
-
-                                formData_2.append('action', 'register');
-
-                                $.ajax({
-                                    url: 'server',
-                                    data: formData_2,
-                                    type: 'POST',
-                                    dataType: 'JSON',
-                                    processData: false,
-                                    contentType: false,
-                                    success: function (response_2) {
-                                        if (response_2.success) {
-                                            $("#login_notification").addClass("alert-success");
-
-                                            $("#register_name").val("");
-                                            $("#register_username").val("");
-                                            $("#register_password").val("");
-                                            $("#register_confirm_password").val("");
-                                        } else {
-                                            $("#login_notification").addClass("alert-danger");
-                                        }
-
-                                        $("#login_notification").text(response_2.message);
-                                        $("#login_notification").removeClass("d-none");
-
-                                        $(".login_wrapper").removeClass("d-none");
-                                        $(".loading").addClass("d-none");
-                                    },
-                                    error: function (_, _, error) {
-                                        console.error(error);
-                                    }
-                                });
-                            });
+                            $("#check_admin_modal").modal("show");
                         } else {
                             $("#register_username").addClass("is-invalid");
                             $("#error_register_username").text(response.message);
@@ -221,6 +174,99 @@ jQuery(document).ready(function () {
                 });
             }
         }
+    })
+
+    $("#check_admin_form").submit(function () {
+        const data = JSON.parse($("#check_admin_data").val());
+        const name = data.name;
+        const username = data.username;
+        const password = data.password;
+
+        const admin_username = $("#check_admin_username").val();
+        const admin_password = $("#check_admin_password").val();
+
+        $(".notification_alert").addClass("d-none");
+
+        $("#check_admin_username").attr("disabled", true);
+        $("#check_admin_password").attr("disabled", true);
+
+        $("#check_admin_submit").attr("disabled", true);
+        $("#check_admin_submit").text("Please Wait..");
+
+        var formData = new FormData();
+
+        formData.append('username', admin_username);
+        formData.append('password', admin_password);
+
+        formData.append('action', 'check_admin');
+
+        $.ajax({
+            url: 'server',
+            data: formData,
+            type: 'POST',
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    var formData = new FormData();
+
+                    formData.append('name', name);
+                    formData.append('username', username);
+                    formData.append('password', password);
+
+                    formData.append('action', 'register');
+
+                    $.ajax({
+                        url: 'server',
+                        data: formData,
+                        type: 'POST',
+                        dataType: 'JSON',
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                            if (response.success) {
+                                $("#register_name").val("");
+                                $("#register_username").val("");
+                                $("#register_password").val("");
+                                $("#register_confirm_password").val("");
+
+                                $("#login_notification").text("A new account has been saved successfully!");
+                                $("#login_notification").addClass("alert-success");
+                                $("#login_notification").removeClass("d-none");
+
+                                $(".notification_alert").addClass("d-none");
+
+                                $("#check_admin_username").removeAttr("disabled");
+                                $("#check_admin_password").removeAttr("disabled");
+                                
+                                $("#check_admin_username").val("");
+                                $("#check_admin_password").val("");
+
+                                $("#check_admin_submit").removeAttr("disabled");
+                                $("#check_admin_submit").text("Submit");
+
+                                $("#check_admin_modal").modal("hide");
+                            }
+                        },
+                        error: function (_, _, error) {
+                            console.error(error);
+                        }
+                    });
+                } else {
+                    $(".notification_alert").removeClass("d-none");
+
+                    $("#check_admin_username").removeAttr("disabled");
+                    $("#check_admin_password").removeAttr("disabled");
+
+                    $("#check_admin_submit").removeAttr("disabled");
+                    $("#check_admin_submit").text("Submit");
+                }
+            },
+            error: function (_, _, error) {
+                console.error(error);
+            }
+        });
     })
 
     $("#register_name").keydown(function () {

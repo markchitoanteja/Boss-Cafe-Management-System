@@ -9,8 +9,11 @@ if (!session("user_id")) {
     $database = new Database();
 
     $user_id = session("user_id");
+    $user_type = session("user_type");
 
     $user_data = $database->select_one("users", ["id" => $user_id]);
+
+    $employee_pages = ["dashboard", "orders", "inventory"];
 }
 ?>
 
@@ -71,28 +74,36 @@ if (!session("user_id")) {
                             <h3>Sales & Orders</h3>
                             <ul class="nav side-menu">
                                 <li><a href="orders"><i class="fa fa-list-alt"></i> Orders </a></li>
-                                <li><a href="sales_report"><i class="fa fa-line-chart"></i> Sales Report </a></li>
+                                <?php if ($user_type == "admin"): ?>
+                                    <li><a href="sales_report"><i class="fa fa-line-chart"></i> Sales Report </a></li>
+                                <?php endif ?>
                             </ul>
                         </div>
                         <div class="menu_section">
                             <h3>Menu & Inventory</h3>
                             <ul class="nav side-menu">
-                                <li><a href="menu_management"><i class="fa fa-cutlery"></i> Menu Management </a></li>
+                                <?php if ($user_type == "admin"): ?>
+                                    <li><a href="menu_management"><i class="fa fa-cutlery"></i> Menu Management </a></li>
+                                <?php endif ?>
                                 <li><a href="inventory"><i class="fa fa-archive"></i> Inventory </a></li>
                             </ul>
                         </div>
-                        <div class="menu_section">
-                            <h3>Reports & Analytics</h3>
-                            <ul class="nav side-menu">
-                                <li><a href="customer_reports"><i class="fa fa-file-text-o"></i> Customer Reports </a></li>
-                            </ul>
-                        </div>
-                        <div class="menu_section">
-                            <h3>Database</h3>
-                            <ul class="nav side-menu">
-                                <li><a href="backup_and_restore"><i class="fa fa-database"></i> Backup and Restore </a></li>
-                            </ul>
-                        </div>
+                        <?php if ($user_type == "admin"): ?>
+                            <div class="menu_section">
+                                <h3>Reports & Analytics</h3>
+                                <ul class="nav side-menu">
+                                    <li><a href="customer_reports"><i class="fa fa-file-text-o"></i> Customer Reports </a></li>
+                                </ul>
+                            </div>
+                        <?php endif ?>
+                        <?php if ($user_type == "admin"): ?>
+                            <div class="menu_section">
+                                <h3>Database</h3>
+                                <ul class="nav side-menu">
+                                    <li><a href="backup_and_restore"><i class="fa fa-database"></i> Backup and Restore </a></li>
+                                </ul>
+                            </div>
+                        <?php endif ?>
                     </div>
 
                     <div class="sidebar-footer hidden-small">
@@ -102,7 +113,7 @@ if (!session("user_id")) {
                         <a data-toggle="tooltip" data-placement="top" title="About Us" class="about_us" href="javascript:void(0)">
                             <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
                         </a>
-                        <a data-toggle="tooltip" data-placement="top" title="Backup" class="backup" href="javascript:void(0)">
+                        <a data-toggle="tooltip" data-placement="top" title="Backup Database" class="<?= $user_type == "admin" ? "backup" : "not_allowed" ?>" href="javascript:void(0)">
                             <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
                         </a>
                         <a data-toggle="tooltip" data-placement="top" title="Logout" class="logout" href="javascript:void(0)">
